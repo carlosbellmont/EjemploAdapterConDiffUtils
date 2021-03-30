@@ -1,16 +1,17 @@
 package com.example.ejemploadapterconlista
 
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
-class StringAdapter(var listaString : MutableList<String>) : RecyclerView.Adapter<StringAdapter.StringViewHolder>()  {
+class StringAdapter : RecyclerView.Adapter<StringAdapter.StringViewHolder>()  {
 
-    class StringViewHolder(var root: View, var textView: TextView) : RecyclerView.ViewHolder(root)
+    private var stringList = listOf<String>()
+
+    class StringViewHolder(private var root: View, var textView: TextView) : RecyclerView.ViewHolder(root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StringViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false)
@@ -19,27 +20,47 @@ class StringAdapter(var listaString : MutableList<String>) : RecyclerView.Adapte
     }
 
     override fun getItemCount(): Int {
-        return listaString.size + 1
+        return stringList.size
     }
 
     override fun onBindViewHolder(holder: StringViewHolder, position: Int) {
-        if (position == itemCount -1) {
-            holder.textView.text = "Añadir"
-            holder.root.setOnClickListener {
-                val toast = Toast.makeText(it.context, "Añadiendo...", Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.CENTER,0,0)
-                toast.show()
-                listaString.add("Elemento$position")
-                notifyDataSetChanged()
-            }
-            return
+        holder.textView.text = stringList[position]
+        holder.textView.setBackgroundColor(holder.textView.context.getColor(R.color.purple_200))
+    }
+
+    fun updateData(list : List<String>) {
+        val oldStringList = stringList
+        val differences : DiffUtil.DiffResult = DiffUtil.calculateDiff(DifferenceChecker(oldStringList, list))
+
+        stringList = list.toList() // Añadimos una copia de la lista
+
+        differences.dispatchUpdatesTo(this)
+        // Atención, no utilizamos el notifyDataSetChanged(). dispatchUpdatesTo lo hará por nosotros.
+        //notifyDataSetChanged()
+    }
+
+
+    class DifferenceChecker(private var oldStringList: List<String>, private var newStringList: List<String>) :
+        DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldStringList.size
         }
-        if (position%2 == 0) {
-            holder.textView.text = listaString[position]
-            holder.textView.setBackgroundColor(holder.textView.context.getColor(R.color.purple_200))
-        } else {
-            holder.textView.text = "${listaString[position]} y Soy Impar"
-            holder.textView.setBackgroundColor(holder.textView.context.getColor(R.color.teal_700))
+
+        override fun getNewListSize(): Int {
+            return newStringList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            // En este caso comparamos que los punteros sean iguales.
+            println("areItemsTheSame?  old = " + oldStringList[oldItemPosition]  + " new = " + newStringList[newItemPosition] + " result = "+ oldStringList[oldItemPosition] == (newStringList[newItemPosition]))
+
+            return oldStringList[oldItemPosition] == newStringList[newItemPosition]
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            // En este caso comparamos que los contenidos sean iguales.
+            println("areContentsTheSame? old = " + oldStringList[oldItemPosition]  + " new = " + newStringList[newItemPosition] + " result = "+  oldStringList[oldItemPosition].contentEquals(newStringList[newItemPosition]))
+            return oldStringList[oldItemPosition].contentEquals(newStringList[newItemPosition])
         }
 
     }
