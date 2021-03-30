@@ -32,11 +32,10 @@ class StringAdapter : RecyclerView.Adapter<StringAdapter.StringViewHolder>()  {
         val oldStringList = stringList
         val differences : DiffUtil.DiffResult = DiffUtil.calculateDiff(DifferenceChecker(oldStringList, list))
 
-        stringList = list.toList() // Añadimos una copia de la lista
+        stringList = list.toList() // Añadimos una copia de la lista.
 
         differences.dispatchUpdatesTo(this)
         // Atención, no utilizamos el notifyDataSetChanged(). dispatchUpdatesTo lo hará por nosotros.
-        //notifyDataSetChanged()
     }
 
 
@@ -51,15 +50,10 @@ class StringAdapter : RecyclerView.Adapter<StringAdapter.StringViewHolder>()  {
         }
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            // En este caso comparamos que los punteros sean iguales.
-            println("areItemsTheSame?  old = " + oldStringList[oldItemPosition]  + " new = " + newStringList[newItemPosition] + " result = "+ oldStringList[oldItemPosition] == (newStringList[newItemPosition]))
-
             return oldStringList[oldItemPosition] == newStringList[newItemPosition]
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            // En este caso comparamos que los contenidos sean iguales.
-            println("areContentsTheSame? old = " + oldStringList[oldItemPosition]  + " new = " + newStringList[newItemPosition] + " result = "+  oldStringList[oldItemPosition].contentEquals(newStringList[newItemPosition]))
             return oldStringList[oldItemPosition].contentEquals(newStringList[newItemPosition])
         }
 
